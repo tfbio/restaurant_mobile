@@ -73,7 +73,9 @@ const FoodDetails: React.FC = () => {
 
   useEffect(() => {
     async function loadFood(): Promise<void> {
-      // Load a specific food with extras based on routeParams id
+      api.get<Food>(`/foods/${routeParams}`).then(response => {
+        setFood(response.data);
+      });
     }
 
     loadFood();
@@ -88,19 +90,30 @@ const FoodDetails: React.FC = () => {
   }
 
   function handleIncrementFood(): void {
-    // Increment food quantity
+    setFoodQuantity(foodQuantity + 1);
   }
 
   function handleDecrementFood(): void {
-    // Decrement food quantity
+    if (foodQuantity === 1) {
+      setFood({} as Food);
+    } else {
+      setFoodQuantity(foodQuantity - 1);
+    }
   }
 
   const toggleFavorite = useCallback(() => {
-    // Toggle if food is favorite or not
+    if (isFavorite === false) {
+      api.post('/favorites', food).then(() => {
+        setIsFavorite(true);
+      });
+    }
   }, [isFavorite, food]);
 
   const cartTotal = useMemo(() => {
-    // Calculate cartTotal
+    const foodPrice = food.price * foodQuantity;
+
+    const total = formatValue(foodPrice);
+    return total;
   }, [extras, food, foodQuantity]);
 
   async function handleFinishOrder(): Promise<void> {
